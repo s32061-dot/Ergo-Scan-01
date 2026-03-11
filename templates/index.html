@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Syndrome Analysis | Uthaiwittayakhom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            max-width: 800px;
+            width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            text-align: center;
+        }
+
+        /* ส่วนของโลโก้ */
+        .header-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header-logos img {
+            height: 90px;
+            width: auto;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        /* ส่วนอัปโหลดไฟล์แบบสวยงาม */
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            display: inline-block;
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .custom-file-upload:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        #fileName {
+            display: block;
+            margin-top: 15px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .btn-analyze {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-family: 'Prompt', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 10px;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-analyze:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* ส่วนแสดงผลลัพธ์ */
+        #loading {
+            display: none;
+            margin-top: 20px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        #resultSection {
+            display: none;
+            margin-top: 40px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 30px;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .result-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            text-align: left;
+        }
+
+        @media (min-width: 600px) {
+            .result-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            padding: 20px;
+            border-radius: 16px;
+            border-left: 6px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+
+        .card.good {
+            border-left-color: #10b981;
+            background-color: #ecfdf5;
+        }
+
+        .card.bad {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .card h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .school-name {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-logos">
+            <img src="{{ url_for('static', filename='school_logo.png') }}" alt="โลโก้โรงเรียนอุทัยวิทยาคม">
+            <img src="{{ url_for('static', filename='math_logo.jpg') }}" alt="โลโก้คณิตศาสตร์">
+        </div>
+
+        <h1>ระบบประเมินความเสี่ยง Office Syndrome</h1>
+        <p class="subtitle">อัปโหลดรูปถ่ายด้านข้างของคุณ เพื่อวิเคราะห์ท่าทางด้วย AI</p>
+
+        <div class="upload-area">
+            <label for="fileInput" class="custom-file-upload">
+                📸 เลือกรูปภาพของคุณ
+            </label>
+            <input type="file" id="fileInput" accept="image/*" onchange="showFileName()">
+            <span id="fileName">ยังไม่ได้เลือกไฟล์รูปภาพ</span>
+        </div>
+
+        <button class="btn-analyze" onclick="uploadImage()">เริ่มการวิเคราะห์</button>
+
+        <div id="loading">⏳ กำลังประมวลผลด้วย AI กรุณารอสักครู่...</div>
+
+        <div id="resultSection">
+            <h2 style="margin-bottom: 20px; color: var(--text-main);">ผลการวิเคราะห์</h2>
+            <img id="outputImage" class="preview-img" src="" alt="Analyzed Posture">
+            
+            <div class="result-cards" id="resultCards">
+                </div>
+        </div>
+        
+        <div class="school-name">
+            © โครงงานคณิตศาสตร์ โรงเรียนอุทัยวิทยาคม
+        </div>
+    </div>
+
+    <script>
+        function showFileName() {
+            const input = document.getElementById('fileInput');
+            const fileNameDisplay = document.getElementById('fileName');
+            if (input.files.length > 0) {
+                fileNameDisplay.textContent = "ไฟล์ที่เลือก: " + input.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "ยังไม่ได้เลือกไฟล์รูปภาพ";
+            }
+        }
+
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            if (!fileInput.files[0]) {
+                alert("กรุณาเลือกรูปภาพก่อนกดวิเคราะห์ครับ");
+                return;
+            }
+
+            // แสดงสถานะกำลังโหลด
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultSection').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                document.getElementById('loading').style.display = 'none';
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // แสดงรูปที่ถูกวาดเส้นแล้ว
+                document.getElementById('outputImage').src = "data:image/jpeg;base64," + data.image;
+                document.getElementById('resultSection').style.display = 'block';
+
+                // สร้างการ์ดแสดงผล
+                const resultCards = document.getElementById('resultCards');
+                let cardsHtml = '';
+
+                // วิเคราะห์คอ
+                const isNeckBad = data.neck_angle > 20;
+                cardsHtml += `
+                    <div class="card ${isNeckBad ? 'bad' : 'good'}">
+                        <h3>องศาคอ (Neck): ${data.neck_angle}°</h3>
+                        <p><b>สถานะ:</b> ${isNeckBad ? '⚠️ คอยื่นไปข้างหน้า' : '✅ ปกติ'}</p>
+                        <p>${isNeckBad ? 'คำแนะนำ: ควรเก็บคาง (Chin tuck) และปรับจอคอมให้อยู่ระดับสายตา' : 'คำแนะนำ: รักษาท่าทางนี้ไว้เพื่อสุขภาพคอที่ดี'}</p>
+                    </div>
+                `;
+
+                // วิเคราะห์หลัง
+                const isBackBad = data.back_angle > 15;
+                cardsHtml += `
+                    <div class="card ${isBackBad ? 'bad' : 'good'}">
+                        <h3>องศาหลัง (Back): ${data.back_angle}°</h3>
+                        <p><b>สถานะ:</b> ${isBackBad ? '⚠️ นั่งหลังค่อม' : '✅ ปกติ'}</p>
+                        <p>${isBackBad ? 'คำแนะนำ: ควรนั่งให้เต็มก้นและพิงพนักเก้าอี้ ยืดอกขึ้น' : 'คำแนะนำ: การกระจายน้ำหนักของกระดูกสันหลังอยู่ในเกณฑ์ดี'}</p>
+                    </div>
+                `;
+
+                resultCards.innerHTML = cardsHtml;
+
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
+            }
+        }
+    </script>
+</body>
+</html>
