@@ -31,6 +31,15 @@ def analyze():
     img_bytes = np.frombuffer(file.read(), np.uint8)
     image = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
     
+    # --- เพิ่มส่วนนี้เพื่อแก้ปัญหาเว็บค้าง ---
+    # ย่อขนาดภาพให้ไม่เกิน 800px เพื่อป้องกัน RAM เต็มบน Render (Free Tier)
+    max_dimension = 800
+    h, w = image.shape[:2]
+    if max(h, w) > max_dimension:
+        scale = max_dimension / max(h, w)
+        image = cv2.resize(image, (int(w * scale), int(h * scale)))
+    # ------------------------------------
+    
     # ประมวลผลภาพ
     results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     
